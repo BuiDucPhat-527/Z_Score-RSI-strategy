@@ -8,15 +8,27 @@ An institutional-grade quantitative research and backtesting framework developed
 
 The strategy operates on the economic principle of **Statistical Mean Reversion**: During severe selling pressures or market panics, equity prices frequently overshoot their intrinsic short-term equilibrium due to behavioral biases and forced liquidations. When prices deviate excessively below their historical moving average into deep oversold territory, mean-reverting forces and value-seeking capital typically trigger a strong corrective rebound.
 
-### Statistical & Technical Indicators:
+### Statistical & Technical Indicators
 
-1. **Price Z-Score (Rolling 20-period lookback):**
-   Measures the number of standard deviations ($\sigma$) that the current closing price deviates from its 20-day rolling mean ($\mu_{20}$):
-   $$\text{Z-Score}_t = \frac{\text{Close}_t - \mu_{20, t}}{\sigma_{20, t}}$$
+#### 1. Price Z-Score (Rolling 20-period lookback)
+Measures the number of standard deviations ($\sigma$) that the current closing price deviates from its 20-day rolling mean ($\mu_{20}$):
 
-2. **Relative Strength Index (14-period RSI):**
-   Quantifies price momentum and confirms exhaustion of downward momentum:
-   $$\text{RS} = \frac{\text{SMA}(\text{Gain}, 14)}{\text{SMA}(\text{Loss}, 14) + \epsilon}, \quad \text{RSI} = 100 - \frac{100}{1 + \text{RS}}$$
+$$
+\text{Z-Score}_t = \frac{\text{Close}_t - \mu_{20, t}}{\sigma_{20, t}}
+$$
+
+#### 2. Relative Strength Index (14-period RSI)
+Quantifies price momentum and confirms exhaustion of downward momentum:
+
+$$
+\text{RSI} = 100 - \frac{100}{1 + \text{RS}}
+$$
+
+where:
+
+$$
+\text{RS} = \frac{\text{SMA}(\text{Gain}, 14)}{\text{SMA}(\text{Loss}, 14) + 10^{-9}}
+$$
 
 ---
 
@@ -26,7 +38,7 @@ Tailored for the Vietnamese cash equity market, the system strictly enforces a *
 
 | Action | Execution Trigger | Theoretical Justification |
 | :--- | :--- | :--- |
-| **Long Entry** | `Z-Score < -2.0` **AND** `RSI < 35` | Price is >2 standard deviations below the mean accompanied by deep oversold momentum. |
+| **Long Entry** | `Z-Score < -2.0` and `RSI < 35` | Price is >2 standard deviations below the mean accompanied by deep oversold momentum. |
 | **Exit / Flat** | `Z-Score >= 0.0` | Price reverts to or crosses above the 20-day moving average (equilibrium restored). |
 
 ### Holding State Machine & Look-Ahead Bias Prevention:
@@ -40,16 +52,16 @@ Tailored for the Vietnamese cash equity market, the system strictly enforces a *
 The backtester calculates realistic portfolio equity curves by explicitly incorporating transaction friction:
 - **Transaction Cost:** `0.15%` ($0.0015$) applied on each position transition (turnover on both entry and exit).
 
-### The 5 Target Quantitative Metrics (+ Total Return):
+### The 5 Target Quantitative Metrics (+ Total Return)
 
-| Metric | Mathematical Definition | Institutional Significance |
+| Metric | Formula | Institutional Significance |
 | :--- | :--- | :--- |
-| **Total Return** | $\frac{\text{Equity}_N}{\text{Equity}_0} - 1$ | Cumulative net return over the entire backtesting horizon. |
-| **Sharpe Ratio** | $\sqrt{252} \times \frac{\mathbb{E}[R_{\text{strategy}}]}{\sigma(R_{\text{strategy}})}$ | Annualized risk-adjusted return relative to total volatility. |
-| **CAGR** | $(1 + \text{Total Return})^{\frac{252}{N}} - 1$ | Compound Annual Growth Rate normalized per 252 trading days. |
-| **Maximum Drawdown (MDD)** | $\min_t \left( \frac{\text{Equity}_t - \text{Peak}_t}{\text{Peak}_t} \right)$ | The peak-to-trough maximum observed portfolio equity loss. |
-| **Profit Factor** | $\frac{\sum \text{Gross Profits}}{\sum \|\text{Gross Losses}\|}$ | Ratio of aggregate winning trade volume to aggregate losing volume. |
-| **Calmar Ratio** | $\frac{\text{CAGR}}{\|\text{Max Drawdown}\|}$ | Ratio of annualized return to maximum historical drawdown risk. |
+| **Total Return** | $(\text{Equity}_N / \text{Equity}_0) - 1$ | Cumulative net return over the entire backtesting horizon. |
+| **Sharpe Ratio** | $\sqrt{252} \times \frac{\text{Mean}(R_s)}{\text{Std}(R_s)}$ | Annualized risk-adjusted return relative to total volatility. |
+| **CAGR** | $(1 + \text{Total Return})^{252 / N} - 1$ | Compound Annual Growth Rate normalized per 252 trading days. |
+| **Maximum Drawdown** | $\min_t \left( \frac{\text{Equity}_t - \text{Peak}_t}{\text{Peak}_t} \right)$ | The peak-to-trough maximum observed portfolio equity loss. |
+| **Profit Factor** | $\frac{\sum \text{Gross Profits}}{\sum \text{Gross Losses}}$ | Ratio of aggregate winning trade volume to aggregate losing volume. |
+| **Calmar Ratio** | $\frac{\text{CAGR}}{\text{abs}(\text{Max Drawdown})}$ | Ratio of annualized return to maximum historical drawdown risk. |
 
 ---
 
